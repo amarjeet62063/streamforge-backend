@@ -124,8 +124,8 @@ exports.LogoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     _id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
     },
     {
@@ -144,5 +144,3 @@ exports.LogoutUser = asyncHandler(async (req, res) => {
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "User logged out"));
 });
-
-
