@@ -340,3 +340,69 @@ exports.getCurrentUser = asyncHandler(async (req, res) => {
       new ApiResponse(200, currentUser, "Feched current user Successfully")
     );
 });
+
+exports.getUserChannelProfile = asyncHandler(async (req, res) => {
+  const { userName } = req.params;
+  if (!userName?.trim()) {
+    throw new ApiError(400, "userName is missing");
+  }
+
+  const channel = await User.aggregate([
+    {
+      $match: {
+        username: userName?.toLowerCase(),
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscriberInfo",
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "subscribTo",
+      },
+    },
+    {
+      $addFields: {
+        subscriberCount: {
+          $size: "$subscriberInfo",
+        },
+        subscribToCount: {
+          $size: "$subscribTo",
+        },
+
+        isSubscribed: {
+          $in: [req.user?._id, "$subscriberInfo.subscriber"],
+        },
+      },
+    },
+    {
+      $project: {
+        fullname: 1,
+        username: 1,
+        avatar: 1,
+        coverimage: 1,
+        subscriberCount: 1,
+        subscribToCount: 1,
+        isSubscribed: 1,
+      },
+    },
+  ]);
+
+  if (!channel?.length) {
+    throw new ApiError(404, "Channel does not exist");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, channel[0], "User channel fetched successfully")
+    );
+});
