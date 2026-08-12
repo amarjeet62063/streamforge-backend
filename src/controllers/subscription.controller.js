@@ -1,7 +1,7 @@
-const Subscription = require("../models/subscription.model");
 const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponce");
-
+const asyncHandler = require("../utils/asyncHandeler");
+const Subscription = require("../models/subscription.model");
 
 exports.subscriptionToggel = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
