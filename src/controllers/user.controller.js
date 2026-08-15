@@ -1,6 +1,7 @@
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandeler");
 const User = require("../models/user.models");
+const WatchHistory = require("../models/history.model");
 const {
   uploadOnCloudinary,
   deleteFileOnCloudinary,
@@ -405,4 +406,18 @@ exports.getUserChannelProfile = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(200, channel[0], "User channel fetched successfully")
     );
+});
+
+exports.getUserVideoHistory = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const history = await WatchHistory.find({ userId })
+    .populate("videoId", "titel,thumbnail,owner")
+    .sort({ watchAt: -1 });
+  if (!history) {
+    throw new ApiError(400, "History not founde");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, history, "History fetched successfully"));
 });

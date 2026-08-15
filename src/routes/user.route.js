@@ -9,6 +9,7 @@ const {
   UpdateUserAvatar,
   UpdateUserCoverimage,
   getCurrentUser,
+  getUserVideoHistory,
 } = require("../controllers/user.controller");
 const { verifyJWT } = require("../middlewares/auth.middleware");
 const upload = require("../middlewares/multer.middlewares");
@@ -44,5 +45,7 @@ userRoute
   .patch(verifyJWT, upload.single("coverimage"), UpdateUserCoverimage);
 userRoute.route("/update-getcurrentuser").get(verifyJWT, getCurrentUser);
 userRoute.route("/c/:userName").get(verifyJWT, getUserChannelProfile);
+
+userRoute.route("/get-history").get(getUserVideoHistory);
 
 module.exports = userRoute;
