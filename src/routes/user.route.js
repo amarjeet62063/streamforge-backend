@@ -46,6 +46,6 @@ userRoute
 userRoute.route("/update-getcurrentuser").get(verifyJWT, getCurrentUser);
 userRoute.route("/c/:userName").get(verifyJWT, getUserChannelProfile);
 
-userRoute.route("/get-history").get(getUserVideoHistory);
+userRoute.route("/get-history").get(verifyJWT, getUserVideoHistory);
 
 module.exports = userRoute;

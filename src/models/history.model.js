@@ -20,7 +20,7 @@ const watchHistorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-watchHistory.index({ userId: 1, videoId: 1 }, { unique: true });
-watchHistory.index({ userId: 1, watchAt: -1 });
+watchHistorySchema.index({ userId: 1, videoId: 1 }, { unique: true });
+watchHistorySchema.index({ userId: 1, watchAt: -1 });
 
 module.exports = mongoose.model("WatchHistory", watchHistorySchema);

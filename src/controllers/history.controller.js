@@ -6,7 +6,7 @@ const ApiResponse = require("../utils/ApiResponce");
 exports.addHistory = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   const userId = req.user._id;
-  const history = await WatchHistory.findByIdAndUpdate(
+  const history = await WatchHistory.findOneAndUpdate(
     {
       videoId,
       userId,
@@ -16,7 +16,7 @@ exports.addHistory = asyncHandler(async (req, res) => {
         watchAt: new Date(),
       },
     },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: "after" }
   );
 
   if (!history) {

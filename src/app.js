@@ -27,8 +27,10 @@ app.use(cookieParser());
 
 //Routes import
 const userRoute = require("./routes/user.route");
+const HistoryRoute = require("./routes/history.route");
 
 //routes declaration
 app.use("/api/v1/users", userRoute);
+app.use("/api/v1/history", HistoryRoute);
 
 module.exports = app;
