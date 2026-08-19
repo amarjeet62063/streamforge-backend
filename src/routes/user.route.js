@@ -12,7 +12,7 @@ const {
   getUserVideoHistory,
 } = require("../controllers/user.controller");
 const { verifyJWT } = require("../middlewares/auth.middleware");
-const upload = require("../middlewares/multer.middlewares");
+const { upload } = require("../middlewares/multer.middlewares");
 
 const userRoute = require("express").Router();
 

@@ -4,14 +4,24 @@ const mongooseAggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const VideoSchema = new mongoose.Schema(
   {
     videoFile: {
-      type: String,
-      required: true,
+      url: { type: String, required: true },
+      public_id: {
+        type: String,
+        required: true,
+      },
+      playbackUrl: {
+        type: String,
+        required: true,
+      },
     },
     thumbnail: {
-      type: String,
-      required: true,
+      url: { type: String, required: true },
+      public_id: {
+        type: String,
+        required: true,
+      },
     },
-    titel: {
+    title: {
       type: String,
       required: true,
     },
@@ -34,6 +44,7 @@ const VideoSchema = new mongoose.Schema(
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
   },
   { timestamps: true }
