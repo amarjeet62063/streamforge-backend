@@ -285,7 +285,8 @@ exports.UpdateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(500, "User avatar updetion error");
   }
   const deletOldeAvatar = await deleteFileOnCloudinary(
-    req.user.avatar.public_id
+    req.user.avatar.public_id,
+    "image"
   );
   if (!deletOldeAvatar) {
     throw new ApiError(500, "error while delete old avatar from cloudinary");
@@ -320,7 +321,8 @@ exports.UpdateUserCoverimage = asyncHandler(async (req, res) => {
     throw new ApiError(500, "User coverimage updetion error");
   }
   const deletOldeCoverimage = await deleteFileOnCloudinary(
-    req.user.avatar.public_id
+    req.user.avatar.public_id,
+    "image"
   );
   if (!deletOldeCoverimage) {
     throw new ApiError(
@@ -411,7 +413,7 @@ exports.getUserChannelProfile = asyncHandler(async (req, res) => {
 exports.getUserVideoHistory = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const history = await WatchHistory.find({ userId })
-    .populate("videoId", "titel,thumbnail,owner")
+    .populate("videoId", " title thumbnail owner duration")
     .sort({ watchAt: -1 });
   if (!history) {
     throw new ApiError(400, "History not founde");

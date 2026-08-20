@@ -27,11 +27,11 @@ exports.uplodVideo = asyncHandler(async (req, res) => {
     uploadOnCloudinary(thumbnailFile),
   ]);
   if (!videoUpload) {
-    await deleteFileOnCloudinary(thumbnailUpload?.public_id);
+    await deleteFileOnCloudinary(thumbnailUpload?.public_id, "image");
     throw new ApiError(500, "video upload failed");
   }
   if (!thumbnailUpload) {
-    await deleteFileOnCloudinary(videoUpload.public_id);
+    await deleteFileOnCloudinary(videoUpload.public_id, "video");
     throw new ApiError(500, "thumbnail upload failed");
   }
   try {

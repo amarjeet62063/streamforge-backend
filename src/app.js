@@ -29,9 +29,11 @@ app.use(cookieParser());
 const userRoute = require("./routes/user.route");
 const HistoryRoute = require("./routes/history.route");
 const videoRoute = require("./routes/video.route");
+const subscriptionRoute = require("./routes/subscription.route");
 
 //routes declaration
 app.use("/api/v1/users", userRoute);
+app.use("/api/v1/subscription", subscriptionRoute);
 app.use("/api/v1/video", videoRoute);
 app.use("/api/v1/history", HistoryRoute);
 
