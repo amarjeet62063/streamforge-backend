@@ -21,10 +21,14 @@ exports.uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
-exports.deleteFileOnCloudinary = async (public_Id) => {
+exports.deleteFileOnCloudinary = async (public_Id, resourceType) => {
   if (!public_Id) {
     return null;
   }
-  const respons = await cloudinary.uploader.destroy(public_Id);
+  //remove files from cloudinary
+  const respons = await cloudinary.uploader.destroy(public_Id, {
+    resource_type: resourceType,
+  });
+
   return respons;
 };

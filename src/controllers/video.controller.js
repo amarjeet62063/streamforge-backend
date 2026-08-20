@@ -34,35 +34,34 @@ exports.uplodVideo = asyncHandler(async (req, res) => {
     await deleteFileOnCloudinary(videoUpload.public_id);
     throw new ApiError(500, "thumbnail upload failed");
   }
-  const video = await videoModel.create({
-    videoFile: {
-      url: videoUpload.secure_url,
-      public_id: videoUpload.public_id,
-      playbackUrl: videoUpload.playback_url,
-    },
-    thumbnail: {
-      url: thumbnailUpload.secure_url,
-      public_id: thumbnailUpload.public_id,
-    },
-    duration: videoUpload.duration,
-    title,
-    description,
-    isPublished,
-    owner,
-  });
-
-  if (!video) {
-    await deleteFileOnCloudinary(videoUpload.public_id);
-    await deleteFileOnCloudinary(videoUpload.public_id);
+  try {
+    const video = await videoModel.create({
+      videoFile: {
+        url: videoUpload.secure_url,
+        public_id: videoUpload.public_id,
+        playbackUrl: videoUpload.playback_url,
+      },
+      thumbnail: {
+        url: thumbnailUpload.secure_url,
+        public_id: thumbnailUpload.public_id,
+      },
+      duration: videoUpload.duration,
+      title,
+      description,
+      isPublished,
+      owner,
+    });
+    return res
+      .status(200)
+      .json(new ApiResponse(200, video, "Video uploaded successfully"));
+  } catch (error) {
+    await deleteFileOnCloudinary(videoUpload.public_id, "video");
+    await deleteFileOnCloudinary(thumbnailUpload.public_id, "image");
     throw new ApiError(
       500,
       "Video upload is temporarily unavailable. Please try again later."
     );
   }
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, video, "Video uploaded successfully"));
 });
 
 /*exports.videoDraft = asyncHandler(async (req, res) => {
