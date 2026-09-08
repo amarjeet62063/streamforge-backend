@@ -64,6 +64,36 @@ exports.uplodVideo = asyncHandler(async (req, res) => {
   }
 });
 
+exports.getOwnVideo = asyncHandler(async (req, res) => {
+  const user_id = req.user._id;
+  const page = Number(req.query.page) > 0 ? Number(req.query.page) : 1;
+  const limit = 10;
+   
+  const Aggregate = videoModel.aggregate([
+    {
+      $match: {
+        owner: user_id,
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+  ]);
+  // console.log("vieo", Aggregate);
+
+  const Videos = await videoModel.aggregatePaginate(Aggregate, {
+    page,
+    limit,
+  });
+  // console.log(Videos);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, Videos, "Your videos fetched successfully"));
+});
+
 /*exports.videoDraft = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   const videoId = await videoModel.create({
