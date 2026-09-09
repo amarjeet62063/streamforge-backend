@@ -76,6 +76,25 @@ exports.getOwnVideo = asyncHandler(async (req, res) => {
       },
     },
     {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              avatar: 1,
+            },
+          },
+        ],
+        as: "owner",
+      },
+    },
+    {
+      $unwind: "$owner",
+    },
+    {
       $sort: {
         createdAt: -1,
       },
