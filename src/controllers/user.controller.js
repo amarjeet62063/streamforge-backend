@@ -62,11 +62,11 @@ exports.registerUser = asyncHandler(async (req, res) => {
   const user = await User.create({
     fullname: fullName,
     avatar: {
-      url: avatar.url,
+      url: avatar.secure_url,
       public_id: avatar.public_id,
     },
     coverimage: {
-      url: coverImage.url || "",
+      url: coverImage.secure_url || "",
       public_id: coverImage.public_id || "",
     },
     email,
@@ -273,7 +273,7 @@ exports.UpdateUserAvatar = asyncHandler(async (req, res) => {
     {
       $set: {
         avatar: {
-          url: uplodedOnDbfilePath.url,
+          url: uplodedOnDbfilePath.secure_url,
           public_id: uplodedOnDbfilePath.public_id,
         },
       },
@@ -311,7 +311,7 @@ exports.UpdateUserCoverimage = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        coverimage: uplodedOnDbfilePath?.url,
+        coverimage: uplodedOnDbfilePath?.secure_url,
       },
     },
     { new: true }
