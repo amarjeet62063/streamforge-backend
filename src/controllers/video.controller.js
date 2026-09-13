@@ -122,6 +122,47 @@ exports.watchVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, videoById, "Video play succesfully"));
 });
 
+exports.getAllVideo = asyncHandler(async (req, res) => {
+  const page = Number(req.query.page) > 0 ? Number(req.query.page) : 1;
+
+  const limit = 10;
+  //db call
+  const aggregate = videoModel.aggregate([
+    {
+      $match: {
+        isPublished: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              avatar: 1,
+            },
+          },
+        ],
+        as: "owner",
+      },
+    },
+    {
+      $unwind: "$owner",
+    },
+  ]);
+  //pagination
+  const Videos = await videoModel.aggregatePaginate(aggregate, {
+    page,
+    limit,
+  });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, Videos, "All video fetched succesfully"));
+});
+
 /*exports.videoDraft = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   const videoId = await videoModel.create({
