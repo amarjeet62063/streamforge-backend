@@ -112,6 +112,16 @@ exports.getOwnVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, Videos, "Your videos fetched successfully"));
 });
 
+exports.watchVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+
+  const videoById = await videoModel.findById(videoId);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, videoById, "Video play succesfully"));
+});
+
 /*exports.videoDraft = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   const videoId = await videoModel.create({
