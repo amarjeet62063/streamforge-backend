@@ -125,7 +125,7 @@ exports.watchVideo = asyncHandler(async (req, res) => {
 exports.getAllVideo = asyncHandler(async (req, res) => {
   const page = Number(req.query.page) > 0 ? Number(req.query.page) : 1;
 
-  const limit = 10;
+  const limit = 12;
   //db call
   const aggregate = videoModel.aggregate([
     {

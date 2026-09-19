@@ -175,7 +175,7 @@ exports.genNewAccesToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "invalide Refresh Token");
     }
 
-    if (decodeClientRefreshToken !== user?.refreshToken) {
+    if (clientRefreshToken !== user?.refreshToken) {
       throw new ApiError(401, "RefreshToken used or expired");
     }
     const { newRefreshToken, accessToken } =
@@ -345,16 +345,18 @@ exports.getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 exports.getUserChannelProfile = asyncHandler(async (req, res) => {
-  const { userName } = req.params;
-  if (!userName?.trim()) {
-    throw new ApiError(400, "userName is missing");
+  const { userId, userName } = req.query;
+
+  if (!(userName?.trim() || userId?.trim())) {
+    throw new ApiError(400, "userName or userId is required");
   }
+  const match = userName?.trim()
+    ? { username: userName.trim().toLowerCase() }
+    : { _id: userId };
 
   const channel = await User.aggregate([
     {
-      $match: {
-        username: userName?.toLowerCase(),
-      },
+      $match: match,
     },
     {
       $lookup: {
