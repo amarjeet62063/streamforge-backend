@@ -3,6 +3,7 @@ const {
   getOwnVideo,
   watchVideo,
   getAllVideo,
+  getCreaterVideos,
 } = require("../controllers/video.controller");
 const { verifyJWT } = require("../middlewares/auth.middleware");
 const { videoUplodeValidetion } = require("../middlewares/multer.middlewares");
@@ -29,5 +30,6 @@ videoRoute.route("/my-video").get(verifyJWT, getOwnVideo);
 videoRoute.route("/watch-video/:videoId").get(watchVideo);
 
 videoRoute.route("/fetch-all-videos").get(getAllVideo);
+videoRoute.route("/fetch-creater-video").get(getCreaterVideos);
 
 module.exports = videoRoute;

@@ -8,6 +8,7 @@ const {
 } = require("../utils/fileHandler");
 const ApiResponse = require("../utils/ApiResponce");
 const jwt = require("jsonwebtoken");
+const { default: mongoose } = require("mongoose");
 
 const genrateAccessTokenAndRefreshTokens = async (userId) => {
   try {
@@ -352,7 +353,7 @@ exports.getUserChannelProfile = asyncHandler(async (req, res) => {
   }
   const match = userName?.trim()
     ? { username: userName.trim().toLowerCase() }
-    : { _id: userId };
+    : { _id: new mongoose.Types.ObjectId(userId) };
 
   const channel = await User.aggregate([
     {
@@ -400,6 +401,7 @@ exports.getUserChannelProfile = asyncHandler(async (req, res) => {
       },
     },
   ]);
+  console.log(channel);
 
   if (!channel?.length) {
     throw new ApiError(404, "Channel does not exist");

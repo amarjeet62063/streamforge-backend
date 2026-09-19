@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const videoModel = require("../models/video.model");
 const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponce");
@@ -163,6 +164,58 @@ exports.getAllVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, Videos, "All video fetched succesfully"));
 });
 
+exports.getCreaterVideos = asyncHandler(async (req, res) => {
+  const { userId, currentPage } = req.query;
+
+  const page = Number(currentPage) > 0 ? Number(currentPage) : 1;
+  const limit = 12;
+
+  if (!userId) {
+    throw new ApiError(400, "Please provide userId");
+  }
+
+  const Aggregation = videoModel.aggregate([
+    {
+      $match: {
+        owner: new mongoose.Types.ObjectId(userId),
+        isPublished: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $project: {
+              avatar: 1,
+              username: 1,
+            },
+          },
+        ],
+        as: "owner",
+      },
+    },
+    {
+      $unwind: "$owner",
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+  ]);
+
+  const videos = await videoModel.aggregatePaginate(Aggregation, {
+    page,
+    limit,
+  });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, videos, "Creater videos feached successfully"));
+});
 /*exports.videoDraft = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   const videoId = await videoModel.create({
