@@ -30,7 +30,7 @@ const genrateAccessTokenAndRefreshTokens = async (userId) => {
 
 exports.registerUser = asyncHandler(async (req, res) => {
   const { fullName, email, userName, password } = req.body;
-  // console.log("first",req.body);
+  // console.log("first", req.body);
 
   if (
     [fullName, email, userName, password].some((filde) => filde?.trim() === "")
@@ -38,7 +38,10 @@ exports.registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fildes are required ");
   }
   const existedUser = await User.findOne({
-    $or: [{ userName }, { email }],
+    $or: [
+      { userName: userName?.trim().toLowerCase() },
+      { email: email?.trim().toLowerCase() },
+    ],
   });
 
   if (existedUser) {
