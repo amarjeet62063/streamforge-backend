@@ -9,6 +9,7 @@ const {
 const ApiResponse = require("../utils/ApiResponce");
 const jwt = require("jsonwebtoken");
 const { default: mongoose } = require("mongoose");
+const cookieOptions = require("../utils/CookieOptions");
 
 const genrateAccessTokenAndRefreshTokens = async (userId) => {
   try {
@@ -112,15 +113,10 @@ exports.loginUser = asyncHandler(async (req, res) => {
     " -password -refreshToken"
   );
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
-
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
     .json(
       new ApiResponse(200, {
         user: loggedInUser,
@@ -145,15 +141,10 @@ exports.LogoutUser = asyncHandler(async (req, res) => {
     }
   );
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
-
   return res
     .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
     .json(new ApiResponse(200, {}, "User logged out"));
 });
 

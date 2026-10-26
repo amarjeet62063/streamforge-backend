@@ -1,5 +1,5 @@
 const dotenv = require("dotenv");
-const connectDB = require("./db/dbindex");
+const connectDB = require("./db/dbIndex");
 const app = require("./app");
 
 dotenv.config({ quiet: true });
