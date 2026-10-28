@@ -79,17 +79,24 @@ exports.registerUser = asyncHandler(async (req, res) => {
     username: userName,
   });
   // console.log("hii");
-
-  const createduser = await User.findById(user._id).select(
-    "-password -refreshToken"
-  );
+  const { refreshToken, accessToken } =
+    await genrateAccessTokenAndRefreshTokens(user._id);
+  const createduser = await User.findById(user._id).select("-password ");
   if (!createduser) {
     throw new ApiError(500, "Somthing went wrong while registering the user");
   }
 
   return res
     .status(201)
-    .json(new ApiResponse(200, createduser, "User registered Succesfully"));
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json( 
+      new ApiResponse(
+        200,
+        { createduser: createduser, accessToken, refreshToken },
+        "User registered Succesfully"
+      )
+    );
 });
 
 exports.loginUser = asyncHandler(async (req, res) => {
