@@ -30,7 +30,10 @@ exports.upload = multer({
     fileSize: 4 * 1024 * 1024,
   },
   fileFilter: (req, file, cb) => {
-    if (allowedImageTypes.includes(file.mimetype)) {
+    const extension = path.extname(file.originalname).toLowerCase();
+    const validMime = allowedImageTypes.includes(file.mimetype);
+    const validExtension = allowedImageExtensions.includes(extension);
+    if (validMime || validExtension) {
       cb(null, true);
     } else {
       cb(new Error("Only image files are allowed"));
