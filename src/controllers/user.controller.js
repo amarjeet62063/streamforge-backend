@@ -90,7 +90,7 @@ exports.registerUser = asyncHandler(async (req, res) => {
     .status(201)
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
-    .json( 
+    .json(
       new ApiResponse(
         200,
         { createduser: createduser, accessToken, refreshToken },
@@ -209,12 +209,13 @@ exports.genNewAccesToken = asyncHandler(async (req, res) => {
 
 //User profile updetion controllers
 exports.UpdateOldePassword = asyncHandler(async (req, res) => {
-  const { oldePassword, newPassword } = req.body;
-  if (!oldePassword || !newPassword) {
-    throw new ApiError(400, "Please enter NewPassword and OldePassword");
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword || !newPassword) {
+    throw new ApiError(400, "Please enter NewPassword and OldPassword");
   }
   const user = await User.findById(req.user?._id);
-  const isPasswordcorrect = await user.isPasswordCorrect(oldePassword);
+  const isPasswordcorrect = await user.isPasswordCorrect(oldPassword);
   if (!isPasswordcorrect) {
     throw new ApiError(401, "incorrect oldePassword");
   }
@@ -229,9 +230,9 @@ exports.UpdateOldePassword = asyncHandler(async (req, res) => {
 });
 
 exports.UpdateUserDetails = asyncHandler(async (req, res) => {
-  const { newfullname, newemail } = req.body;
+  const { fullname, email } = req.body;
 
-  if (!newfullname || !newemail) {
+  if (!fullname || !email) {
     throw new ApiError(400, "Please enter fullname and email");
   }
 
@@ -239,11 +240,11 @@ exports.UpdateUserDetails = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        fullname: newfullname,
-        email: newemail,
+        fullname: fullname,
+        email: email,
       },
     },
-    { new: true }
+    { returnDocument: "after", runValidators: true }
   ).select("-password -refreshToken");
   if (!user) {
     throw new ApiError(500, "error while update user details");
@@ -268,7 +269,7 @@ exports.UpdateUserAvatar = asyncHandler(async (req, res) => {
 
   const uplodedOnDbfilePath = await uploadOnCloudinary(avatarLocalPath);
   if (!uplodedOnDbfilePath) {
-    throw new ApiError(500, "Error while uplode avatar File on cloudinary");
+    throw new ApiError(500, "Error while uplode avatar File");
   }
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -280,10 +281,11 @@ exports.UpdateUserAvatar = asyncHandler(async (req, res) => {
         },
       },
     },
-    { new: true }
+    { returnDocument: "after", runValidators: true }
   ).select(" -password -refreshToken");
 
   if (!user) {
+    await deleteFileOnCloudinary(uplodedOnDbfilePath.public_id, "image");
     throw new ApiError(500, "User avatar updetion error");
   }
   const deletOldeAvatar = await deleteFileOnCloudinary(
@@ -313,13 +315,17 @@ exports.UpdateUserCoverimage = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        coverimage: uplodedOnDbfilePath?.secure_url,
+        coverimage: {
+          url: uplodedOnDbfilePath.secure_url,
+          public_id: uplodedOnDbfilePath.public_id,
+        },
       },
     },
     { new: true }
   ).select(" -password -refreshToken");
 
   if (!user) {
+    await deleteFileOnCloudinary(uplodedOnDbfilePath.public_id, "image");
     throw new ApiError(500, "User coverimage updetion error");
   }
   const deletOldeCoverimage = await deleteFileOnCloudinary(
@@ -417,13 +423,50 @@ exports.getUserChannelProfile = asyncHandler(async (req, res) => {
 
 exports.getUserVideoHistory = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const history = await WatchHistory.find({ userId })
-    .populate("videoId", " title thumbnail owner duration")
-    .sort({ watchAt: -1 });
+
+  const history = await WatchHistory.aggregate([
+    {
+      $match: { userId },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "videoId",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              pipeline: [
+                {
+                  $project: {
+                    username: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+              as: "ownerInfo",
+            },
+          },
+          {
+            $unwind: "$ownerInfo",
+          },
+        ],
+        as: "videoInfo",
+      },
+    },
+    {
+      $unwind: "$videoInfo",
+    },
+    {
+      $sort: { watchAt: -1 },
+    },
+  ]);
   if (!history) {
     throw new ApiError(400, "History not founde");
   }
-
   return res
     .status(200)
     .json(new ApiResponse(200, history, "History fetched successfully"));
